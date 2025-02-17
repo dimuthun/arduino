@@ -1,2 +1,2 @@
 # arduino
-Hoppy projects of Arduino, ESP32, ESP8266 
+Hobby projects of Arduino, ESP32, ESP8266 
