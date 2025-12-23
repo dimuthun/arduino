@@ -1,0 +1,87 @@
+Required Arduino Libraries for SolaX Display Project
+=====================================================
+
+BUILT-IN LIBRARIES (included with ESP8266 board package):
+----------------------------------------------------------
+1. ESP8266WiFi
+   - Purpose: WiFi connectivity for NodeMCU
+   - Version: Comes with ESP8266 board package
+   - Installation: Automatic with board installation
+
+2. ESP8266HTTPClient
+   - Purpose: HTTP/HTTPS client for API calls
+   - Version: Comes with ESP8266 board package
+   - Installation: Automatic with board installation
+
+3. WiFiClientSecure
+   - Purpose: Secure HTTPS connections
+   - Version: Comes with ESP8266 board package
+   - Installation: Automatic with board installation
+
+
+EXTERNAL LIBRARIES (install via Library Manager):
+--------------------------------------------------
+4. ArduinoJson
+   - Author: Benoit Blanchon
+   - Purpose: JSON parsing for API responses
+   - Minimum Version: 6.21.0
+   - Recommended Version: Latest 6.x
+   - Installation:
+     * Open Arduino IDE
+     * Go to: Sketch → Include Library → Manage Libraries
+     * Search: "ArduinoJson"
+     * Select: "ArduinoJson by Benoit Blanchon"
+     * Click Install
+   - Documentation: https://arduinojson.org/
+
+5. LiquidCrystal_I2C
+   - Author: Frank de Brabander
+   - Purpose: I2C LCD display control
+   - Version: 1.1.2 or higher
+   - Installation:
+     * Open Arduino IDE
+     * Go to: Sketch → Include Library → Manage Libraries
+     * Search: "LiquidCrystal I2C"
+     * Select: "LiquidCrystal I2C by Frank de Brabander"
+     * Click Install
+   - Alternative: https://github.com/johnrickman/LiquidCrystal_I2C
+
+
+BOARD SUPPORT PACKAGE:
+----------------------
+ESP8266 Board Package
+   - Publisher: ESP8266 Community
+   - Purpose: Arduino support for ESP8266/NodeMCU
+   - Installation:
+     * Open Arduino IDE
+     * Go to: File → Preferences
+     * Add to "Additional Boards Manager URLs":
+       http://arduino.esp8266.com/stable/package_esp8266com_index.json
+     * Go to: Tools → Board → Boards Manager
+     * Search: "esp8266"
+     * Select: "esp8266 by ESP8266 Community"
+     * Click Install
+   - Recommended Version: 3.0.0 or higher
+
+
+QUICK INSTALLATION SUMMARY:
+---------------------------
+1. Install ESP8266 board package first
+2. Install ArduinoJson (v6.x)
+3. Install LiquidCrystal_I2C
+4. Verify all libraries are detected (Sketch → Include Library → should show all)
+
+
+TROUBLESHOOTING:
+----------------
+If libraries are not found after installation:
+- Restart Arduino IDE
+- Check: File → Preferences → Sketchbook location
+- Verify libraries are in: [Sketchbook]/libraries/ folder
+- Reinstall library if necessary
+
+If compilation errors occur:
+- Ensure ArduinoJson is version 6.x (not 5.x or 7.x)
+- Update ESP8266 board package to latest version
+- Clean build: Delete build cache and recompile
+
