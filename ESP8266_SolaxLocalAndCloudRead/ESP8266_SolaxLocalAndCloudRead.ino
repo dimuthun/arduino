@@ -17,6 +17,17 @@
 // Initialize LCD
 LiquidCrystal_I2C lcd(LCD_ADDRESS, LCD_COLUMNS, LCD_ROWS);
 
+// Wrapper function to fix 16x4 LCD addressing issue
+// 16x4 LCDs have different memory layout than 20x4, causing 4-char shift on rows 2 & 3
+void setLcdCursor(int col, int row) {
+  // For 16x4 displays: rows 2 and 3 need column offset correction
+  if (row == 2 || row == 3) {
+    lcd.setCursor(col - 4, row);
+  } else {
+    lcd.setCursor(col, row);
+  }
+}
+
 // Data storage
 struct SolarData {
   // Power data
@@ -89,12 +100,12 @@ void setup() {
   lcd.clear();
   
   // Display startup message
-  lcd.setCursor(0, 0);
+  setLcdCursor(0, 0);
   lcd.print("SolaX Display");
-  lcd.setCursor(0, 1);
+  setLcdCursor(0, 1);
   lcd.print("Mode: ");
   lcd.print(isLocal ? "LOCAL" : "CLOUD");
-  lcd.setCursor(0, 2);
+  setLcdCursor(0, 2);
   lcd.print("Initializing...");
   delay(2000);
   
@@ -116,9 +127,9 @@ void loop() {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi disconnected. Reconnecting...");
     lcd.clear();
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("WiFi Lost");
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Reconnecting...");
     connectWiFi();
   }
@@ -170,10 +181,10 @@ void fetchLocalSolarData() {
   }
   
   lcd.clear();
-  lcd.setCursor(0, 0);
+  setLcdCursor(0, 0);
   lcd.print("Updating (Local)");
   if (retryCount > 0) {
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Retry ");
     lcd.print(retryCount);
     lcd.print("/");
@@ -218,9 +229,9 @@ void fetchLocalSolarData() {
       Serial.printf("HTTP request failed, error: %s\n", http.errorToString(httpCode).c_str());
       
       lcd.clear();
-      lcd.setCursor(0, 0);
+      setLcdCursor(0, 0);
       lcd.print("API Error");
-      lcd.setCursor(0, 1);
+      setLcdCursor(0, 1);
       lcd.print("Code: ");
       lcd.print(httpCode);
       
@@ -231,9 +242,9 @@ void fetchLocalSolarData() {
   } else {
     Serial.println("Unable to connect to Local API");
     lcd.clear();
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("Connection");
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Failed (Local)");
     solarData.valid = false;
   }
@@ -249,7 +260,7 @@ void fetchLocalSolarData() {
       Serial.printf("Will retry in %d seconds (attempt %d of %d)\n", 
                     delayMs / 1000, retryCount, maxRetries);
       
-      lcd.setCursor(0, 2);
+      setLcdCursor(0, 2);
       lcd.print("Retry in ");
       lcd.print(delayMs / 1000);
       lcd.print("s");
@@ -259,9 +270,9 @@ void fetchLocalSolarData() {
       retryCount = 0;  // Reset for next regular update
       isRetrying = false;
       
-      lcd.setCursor(0, 2);
+      setLcdCursor(0, 2);
       lcd.print("Max retries");
-      lcd.setCursor(0, 3);
+      setLcdCursor(0, 3);
       lcd.print("reached");
       delay(3000);
     }
@@ -296,10 +307,10 @@ void connectWiFi() {
   WiFi.begin(ssid, password);
   
   lcd.clear();
-  lcd.setCursor(0, 0);
+  setLcdCursor(0, 0);
   lcd.print("WiFi: ");
   lcd.print(modeText);
-  lcd.setCursor(0, 1);
+  setLcdCursor(0, 1);
   lcd.print("Connecting...");
   
   int attempts = 0;
@@ -316,18 +327,18 @@ void connectWiFi() {
     Serial.println(WiFi.localIP());
     
     lcd.clear();
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print(modeText);
     lcd.print(" Connected");
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print(WiFi.localIP());
     delay(2000);
   } else {
     Serial.println("\nWiFi connection failed!");
     lcd.clear();
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("WiFi Failed!");
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Check config.h");
     delay(5000);
   }
@@ -341,10 +352,10 @@ void fetchCloudSolarData() {
   }
   
   lcd.clear();
-  lcd.setCursor(0, 0);
+  setLcdCursor(0, 0);
   lcd.print("Updating (Cloud)");
   if (retryCount > 0) {
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Retry ");
     lcd.print(retryCount);
     lcd.print("/");
@@ -391,9 +402,9 @@ void fetchCloudSolarData() {
       Serial.printf("HTTP request failed, error: %s\n", https.errorToString(httpCode).c_str());
       
       lcd.clear();
-      lcd.setCursor(0, 0);
+      setLcdCursor(0, 0);
       lcd.print("API Error");
-      lcd.setCursor(0, 1);
+      setLcdCursor(0, 1);
       lcd.print("Code: ");
       lcd.print(httpCode);
       
@@ -404,9 +415,9 @@ void fetchCloudSolarData() {
   } else {
     Serial.println("Unable to connect to Cloud API");
     lcd.clear();
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("Connection");
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Failed (Cloud)");
     solarData.valid = false;
   }
@@ -422,7 +433,7 @@ void fetchCloudSolarData() {
       Serial.printf("Will retry in %d seconds (attempt %d of %d)\n", 
                     delayMs / 1000, retryCount, maxRetries);
       
-      lcd.setCursor(0, 2);
+      setLcdCursor(0, 2);
       lcd.print("Retry in ");
       lcd.print(delayMs / 1000);
       lcd.print("s");
@@ -432,9 +443,9 @@ void fetchCloudSolarData() {
       retryCount = 0;  // Reset for next regular update
       isRetrying = false;
       
-      lcd.setCursor(0, 2);
+      setLcdCursor(0, 2);
       lcd.print("Max retries");
-      lcd.setCursor(0, 3);
+      setLcdCursor(0, 3);
       lcd.print("reached");
       delay(3000);
     }
@@ -466,7 +477,7 @@ bool parseLocalJsonResponse(String jsonString) {
     Serial.println(error.c_str());
     
     lcd.clear();
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("Parse Error");
     
     solarData.valid = false;
@@ -541,7 +552,7 @@ bool parseJsonResponse(String jsonString) {
     Serial.println(error.c_str());
     
     lcd.clear();
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("Parse Error");
     
     solarData.valid = false;
@@ -558,9 +569,9 @@ bool parseJsonResponse(String jsonString) {
     Serial.println(exception);
     
     lcd.clear();
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("API Error");
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print(exception.substring(0, 16));
     
     solarData.valid = false;
@@ -617,27 +628,27 @@ void displayScreen1() {
   lcd.clear();
   
   // Line 0: AC Power with mode indicator
-  lcd.setCursor(0, 0);
+  setLcdCursor(0, 0);
   lcd.print("AC:");
   lcd.print((int)solarData.acPower);
   lcd.print(" W");
-  //lcd.setCursor(15, 0);
+  //setLcdCursor(15, 0);
   //lcd.print(solarData.isLocalMode ? "L" : "C");
   
   // Line 1: Total PV Power
-  lcd.setCursor(0, 1);
+  setLcdCursor(0, 1);
   lcd.print("PV:");
   lcd.print((int)(solarData.powerDC1 + solarData.powerDC2));
   lcd.print(" W");
   
   // Line 2: Today's Yield
-  lcd.setCursor(0, 2);
+  setLcdCursor(0, 2);
   lcd.print("Today:");
   lcd.print(solarData.yieldToday, 1);
   lcd.print(" kWh");
   
   // Line 3: Total Yield
-  lcd.setCursor(0, 3);
+  setLcdCursor(0, 3);
   lcd.print("Total:");
   lcd.print((int)solarData.yieldTotal);
   lcd.print(" kWh");
@@ -654,41 +665,41 @@ void displayScreen2() {
   
   if (solarData.isLocalMode) {
     // Line 0: AC Voltage with mode indicator
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("AC Volt:");
     lcd.print(solarData.acVoltage, 1);
     lcd.print("V");
-    //lcd.setCursor(15, 0);
+    //setLcdCursor(15, 0);
     //lcd.print("L");
     
     // Line 1: AC Current
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("AC Curr:");
     lcd.print(solarData.acCurrent, 1);
     lcd.print("A");
     
     // Line 2: AC Frequency
-    lcd.setCursor(0, 2);
+    setLcdCursor(0, 2);
     lcd.print("AC Freq:");
     lcd.print(solarData.acFrequency, 2);
     lcd.print("Hz");
     
     // Line 3: AC Power
-    lcd.setCursor(0, 3);
+    setLcdCursor(0, 3);
     lcd.print("AC Pwr:");
     lcd.print((int)solarData.acPower);
     lcd.print(" W");
   } else {
     // Cloud mode - show status instead
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("AC Details");
-    lcd.setCursor(15, 0);
+    setLcdCursor(15, 0);
     lcd.print("C");
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Not available");
-    lcd.setCursor(0, 2);
+    setLcdCursor(0, 2);
     lcd.print("in Cloud mode");
-    lcd.setCursor(0, 3);
+    setLcdCursor(0, 3);
     lcd.print("Sts:");
     lcd.print(solarData.inverterStatus.substring(0, 11));
   }
@@ -705,55 +716,55 @@ void displayScreen3() {
   
   if (solarData.isLocalMode) {
     // Line 0: PV1 Voltage and Current
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("PV1:");
     lcd.print((int)solarData.voltageDC1);
     lcd.print("V ");
     
     // Right-align current value (format as X.XA with padding)
-    lcd.setCursor(10, 0);
+    setLcdCursor(10, 0);
     if (solarData.currentDC1 < 10) lcd.print(" ");
     lcd.print(solarData.currentDC1, 1);
     lcd.print("A");
     
     // Line 1: PV1 Power
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("      ");
     lcd.print((int)solarData.powerDC1);
     lcd.print(" W");
     
     // Line 2: PV2 Voltage and Current
-    lcd.setCursor(0, 2);
+    setLcdCursor(0, 2);
     lcd.print("PV2:");
     lcd.print((int)solarData.voltageDC2);
     lcd.print("V ");
     
     // Right-align current value
-    lcd.setCursor(10, 2);
+    setLcdCursor(10, 2);
     if (solarData.currentDC2 < 10) lcd.print(" ");
     lcd.print(solarData.currentDC2, 1);
     lcd.print("A");
     
     // Line 3: PV2 Power
-    lcd.setCursor(0, 3);
+    setLcdCursor(0, 3);
     lcd.print("      ");
     lcd.print((int)solarData.powerDC2);
     lcd.print(" W");
   } else {
     // Cloud mode - simpler display
     // Line 0: PV1 Power
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("PV1: ");
     lcd.print((int)solarData.powerDC1);
     lcd.print(" W");
     
     // Line 1: Status
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Sts:");
     lcd.print(solarData.inverterStatus.substring(0, 12));
     
     // Line 2: PV2 Power
-    lcd.setCursor(0, 2);
+    setLcdCursor(0, 2);
     lcd.print("PV2: ");
     lcd.print((int)solarData.powerDC2);
     lcd.print(" W");
@@ -773,41 +784,41 @@ void displayScreen4() {
   
   if (solarData.isLocalMode) {
     // Line 0: Temperature with mode indicator
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("Temp:");
     lcd.print((int)solarData.inverterTemperature);
     lcd.print(" C");
-    //lcd.setCursor(15, 0);
+    //setLcdCursor(15, 0);
     //lcd.print("L");
     
     // Line 1: Export Power
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Export:");
     lcd.print((int)solarData.exportPower);
     lcd.print(" W");
     
     // Line 2: Total Import Energy
-    lcd.setCursor(0, 2);
+    setLcdCursor(0, 2);
     lcd.print("Import:");
     lcd.print(solarData.totalImportEnergy, 1);
     lcd.print("kWh");
     
     // Line 3: Total Export Energy
-    lcd.setCursor(0, 3);
+    setLcdCursor(0, 3);
     lcd.print("Export:");
     lcd.print(solarData.totalExportEnergy, 1);
     lcd.print("kWh");
   } else {
     // Cloud mode - show status
-    lcd.setCursor(0, 0);
+    setLcdCursor(0, 0);
     lcd.print("System Info");
-    lcd.setCursor(15, 0);
+    setLcdCursor(15, 0);
     lcd.print("C");
-    lcd.setCursor(0, 1);
+    setLcdCursor(0, 1);
     lcd.print("Not available");
-    lcd.setCursor(0, 2);
+    setLcdCursor(0, 2);
     lcd.print("in Cloud mode");
-    lcd.setCursor(0, 3);
+    setLcdCursor(0, 3);
     lcd.print("Sts:");
     lcd.print(solarData.inverterStatus.substring(0, 11));
   }
